@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lylow Store - Top Up Game</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  color:#111;
+  scroll-behavior: smooth;
+  background: url("https://cdn.pixabay.com/photo/2016/03/31/20/11/video-game-1294478_1280.png") no-repeat center center fixed;
+  background-size: cover;
+}
+body::before{
+  content:"";
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(255,255,255,0.75);
+  z-index:-1;
+}
+
+#loader{
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+.spinner{
+  border:6px solid #f3f3f3;
+  border-top:6px solid #22c55e;
+  border-radius:50%;
+  width:60px;
+  height:60px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:20px;
+  opacity:0;
+  animation: fadeIn 1s forwards 0.5s;
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+h1{text-align:center;margin-bottom:5px;}
+.subtitle{text-align:center;font-size:13px;opacity:.7;margin-bottom:15px;}
+
+.card{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover{
+  transform: translateY(-5px);
+  box-shadow:0 15px 35px rgba(0,0,0,0.15);
+}
+
+label{font-size:13px;opacity:.7;}
+select,input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+  margin-top:8px;
+  font-size:14px;
+  transition: all 0.3s ease;
+}
+select:hover,input:hover{transform: scale(1.02);}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:14px;
+  border:none;
+  border-radius:14px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  transition: all 0.3s ease;
+  background:#22c55e;
+  color:white;
+}
+button:hover{opacity:0.9; transform: scale(1.02);}
+
+.payment-methods{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+.payment-methods h3{
+  text-align:center;
+  font-size:16px;
+  margin-bottom:12px;
+}
+.payment-methods ul{list-style:none;padding:0;}
+.payment-methods li{padding:8px 0;font-size:14px;border-bottom:1px solid #eee;}
+.payment-methods li:last-child{border-bottom:none;}
+
+.footer{text-align:center;font-size:11px;opacity:.6;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="spinner"></div>
+</div>
+
+<div class="container">
+
+<h1>Lylow Store</h1>
+<div class="subtitle">Top Up Game Aman & Cepat</div>
+
+<div class="card">
+  <label>Pilih Game</label>
+  <select id="game" onchange="updateNominal()">
+    <option value="">-- Pilih Game --</option>
+    <option>Mobile Legends</option>
+    <option>Free Fire</option>
+    <option>PUBG Mobile</option>
+    <option>Roblox</option>
+  </select>
+
+  <label>User ID / Username</label>
+  <input type="text" id="userid" placeholder="Masukkan ID">
+
+  <label id="serverLabel">Server / Zone (jika ada)</label>
+  <input type="text" id="server" placeholder="Contoh: 1234">
+
+  <label>Nominal</label>
+  <select id="nominal">
+    <option value="">-- Pilih Nominal --</option>
+  </select>
+
+  <button onclick="orderWA()">Order via WhatsApp</button>
+</div>
+
+<div class="payment-methods">
+  <h3>Metode Pembayaran</h3>
+  <ul>
+    <li>OVO</li>
+    <li>GoPay</li>
+    <li>DANA</li>
+  </ul>
+</div>
+
+<div class="footer">
+© 2026 Lylow Store
+</div>
+
+</div>
+
+<script>
+window.addEventListener('load',()=>{document.getElementById('loader').style.display='none';});
+
+const dataGame={
+"Mobile Legends":[["86 Diamond","20000"],["172 Diamond","38000"],["257 Diamond","56000"]],
+"Free Fire":[["70 Diamond","10000"],["140 Diamond","19000"],["355 Diamond","47000"]],
+"PUBG Mobile":[["60 UC","15000"],["325 UC","75000"],["660 UC","150000"]],
+"Roblox":[["80 Robux","15000"],["160 Robux","30000"],["400 Robux","75000"]]
+};
+
+function updateNominal(){
+  let g=document.getElementById("game").value;
+  let nominal=document.getElementById("nominal");
+  let serverLabel=document.getElementById("serverLabel");
+  let serverInput=document.getElementById("server");
+
+  if(g==="Roblox"){
+    serverLabel.style.display="none";
+    serverInput.style.display="none";
+  }else{
+    serverLabel.style.display="block";
+    serverInput.style.display="block";
+  }
+
+  nominal.innerHTML='<option value="">-- Pilih Nominal --</option>';
+  if(!g) return;
+  dataGame[g].forEach(i=>{
+    let o=document.createElement("option");
+    o.value=i[0]+"|"+i[1];
+    o.text=i[0]+" - Rp"+i[1];
+    nominal.appendChild(o);
+  });
+}
+
+function orderWA(){
+  let game=document.getElementById("game").value;
+  let id=document.getElementById("userid").value;
+  let server=document.getElementById("server").value;
+  let nominal=document.getElementById("nominal").value;
+  if(!game||!id||!nominal){alert("Lengkapi semua data!"); return;}
+  let d=nominal.split("|");
+  let msg=`Halo admin, saya mau top up%0A%0A
+Game   : ${game}%0A
+ID     : ${id}%0A
+Nominal: ${d[0]}%0A
+Harga  : Rp${d[1]}%0A%0A
+Saya sudah lihat metode pembayaran di website.`;
+
+  window.open("https://wa.me/6283829117663?text="+msg);
+}
+</script>
+
+</body>
+</html>
