@@ -2,143 +2,227 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Lylow Store - Top Up Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lylow Top Up</title>
 
 <style>
-:root {
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --primary:#4f6df5;
-  --text:#2b2b2b;
-  --muted:#777;
-  --radius:14px;
+body{
+  margin:0;
+  background:#f4f6fb;
+  font-family:Arial, Helvetica, sans-serif;
 }
-*{box-sizing:border-box;font-family:"Segoe UI",sans-serif}
-body{margin:0;background:var(--bg);color:var(--text)}
-header{text-align:center;padding:28px 20px}
-header h1{margin:0;color:var(--primary)}
-header p{color:var(--muted);font-size:14px}
-.container{max-width:500px;margin:auto;padding:0 16px 40px}
-.card{
-  background:var(--card);
+.box{
+  max-width:420px;
+  margin:40px auto;
+  background:#fff;
   padding:20px;
-  border-radius:var(--radius);
-  box-shadow:0 10px 30px rgba(0,0,0,.05)
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block}
-select,input{
+h1{
+  text-align:center;
+  color:#333;
+}
+p{
+  text-align:center;
+  font-size:13px;
+  color:#666;
+}
+label{
+  font-size:13px;
+  color:#444;
+}
+input,select{
+  width:100%;
+  padding:10px;
+  margin:6px 0 14px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:14px;
+}
+input[readonly]{
+  width:150px; /* pendekin kolom harga */
+  background:#f1f1f1;
+}
+.pay{
+  display:flex;
+  gap:10px;
+  margin-bottom:18px;
+}
+.pay label{
+  flex:1;
+  border:1px solid #ccc;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+  font-size:13px;
+  cursor:pointer;
+}
+.pay input{display:none;}
+.pay input:checked + label{
+  background:#eef1ff;
+  border-color:#6b7cff;
+  color:#2b3cff;
+}
+button{
   width:100%;
   padding:12px;
-  border-radius:10px;
-  border:1px solid #ddd;
-  margin-bottom:14px
-}
-.btn{
-  width:100%;
-  padding:14px;
   border:none;
   border-radius:12px;
-  background:var(--primary);
+  background:#6b7cff;
   color:#fff;
-  font-size:15px;
-  cursor:pointer
+  font-size:14px;
 }
-.payment{text-align:center;color:var(--muted);font-size:14px;margin-top:18px}
-footer{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}
+.footer{
+  text-align:center;
+  font-size:12px;
+  color:#777;
+  margin-top:12px;
+}
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>Lylow Store</h1>
-  <p>Top Up Game Aman & Terpercaya</p>
-</header>
-
-<div class="container">
-<div class="card">
+<div class="box">
+<h1>Lylow Top Up</h1>
+<p>Harga sudah termasuk biaya admin</p>
 
 <label>Game</label>
-<select id="game" onchange="toggleServer()">
+<select id="game" onchange="updateNominal()">
   <option value="">-- Pilih Game --</option>
-  <option value="Mobile Legends">Mobile Legends</option>
-  <option value="PUBG Mobile">PUBG Mobile</option>
-  <option value="Honor of Kings">Honor of Kings</option>
+  <option value="ml">Mobile Legends</option>
+  <option value="ff">Free Fire</option>
+  <option value="pubg">PUBG Mobile</option>
+  <option value="hok">Honor of Kings</option>
 </select>
 
-<label>ID Player</label>
-<input type="text" id="userid" placeholder="Contoh: 12345678">
+<label>User ID</label>
+<input id="userid" placeholder="Masukkan ID">
 
-<div id="serverBox">
-<label>Server</label>
-<input type="text" id="server" placeholder="Contoh: 4321">
-</div>
+<label>Server (jika ada)</label>
+<input id="server" placeholder="Kosongkan jika tidak ada">
 
 <label>Nominal</label>
-<select id="nominal" onchange="setHarga()">
+<select id="nominal" onchange="updateHarga()">
   <option value="">-- Pilih Nominal --</option>
-  <option value="86 Diamond">86 Diamond</option>
-  <option value="172 Diamond">172 Diamond</option>
-  <option value="257 Diamond">257 Diamond</option>
 </select>
 
 <label>Harga</label>
-<input type="text" id="harga" readonly placeholder="Harga otomatis">
+<input id="harga" readonly placeholder="Harga otomatis">
 
-<button class="btn" onclick="orderWA()">Order via WhatsApp</button>
+<label>Metode Pembayaran</label>
+<div class="pay">
+  <input type="radio" name="pay" id="dana" value="DANA" checked onclick="updateHarga()">
+  <label for="dana">DANA</label>
 
-<div class="payment">
-Metode pembayaran:<br>
-DANA • OVO • GoPay
+  <input type="radio" name="pay" id="ovo" value="OVO" onclick="updateHarga()">
+  <label for="ovo">OVO</label>
+
+  <input type="radio" name="pay" id="gopay" value="GoPay" onclick="updateHarga()">
+  <label for="gopay">GoPay</label>
 </div>
 
-</div>
+<button onclick="kirimWA()">Order via WhatsApp</button>
 
-<footer>© 2026 Lylow Store</footer>
+<div class="footer">
+Jam operasional<br>
+16.00 – 22.00 WIB
+</div>
 </div>
 
 <script>
-const priceList = {
-  "86 Diamond": "Rp 23.000",
-  "172 Diamond": "Rp 45.000",
-  "257 Diamond": "Rp 65.000"
+// DATA NOMINAL PER GAME
+const dataNominal = {
+  ml: [
+    { nama: "28 (25+3) Diamond", dana: 9000, ovo: 9000, gopay: 9000 },
+    { nama: "44 (40+4) Diamond", dana: 14500, ovo: 14500, gopay: 14500 },
+     { nama: "59 (54+5) Diamond", dana: 17500, ovo: 17500, gopay: 17500 },
+     { nama: "85 (77+8) Diamond", dana: 25000, ovo: 25000, gopay: 25000 },
+    { nama: "170 (150+20) Diamond", dana: 48000, ovo: 48000, gopay: 48000 },
+    { nama: "WDP (Weekly Diamond Pass)", dana:30000, ovo: 30000, gopay: 30000}
+  ],
+  ff: [
+    { nama: "50 Diamond", dana: 8500, ovo: 8500, gopay: 8500 },
+    { nama: "70 Diamond", dana: 11500, ovo: 11500, gopay: 11500 },
+    { nama: "140 Diamond", dana: 20500, ovo:20500, gopay: 20500},
+    { nama: "355 Diamond", dana: 48000, ovo: 48000, gopay: 48000},
+    { nama: "720 Diamod", dana: 95000, ovo: 95000, gopay: 95000}
+  ],
+  pubg: [
+    { nama: "60 UC", dana: 19000, ovo: 19000, gopay: 19500 },
+    { nama: "325 UC", dana: 87500, ovo: 87500, gopay: 89000 },
+    { nama: "660 UC", dana: 177000, ovo: 177000, gopay: 178000}
+  ],
+  hok: [
+    { nama: "46 (23+23) Token", dana: 7500, ovo: 7500, gopay: 8000 },
+    { nama: "160 (80+80) Token", dana: 20000, ovo: 20000, gopay: 20500 },
+    { nama: "288 (240+48) Token", dana: 51000, ovo: 51000, gopay: 51000},
+    { nama: "480 (400+80) Token", dana: 86000, ovo: 86000, gopay: 86000}
+  ]
 };
 
-function setHarga(){
-  const nominal = document.getElementById("nominal").value;
-  document.getElementById("harga").value = priceList[nominal] || "";
+// UPDATE NOMINAL SESUAI GAME
+function updateNominal(){
+  const g = document.getElementById("game").value;
+  const n = document.getElementById("nominal");
+  const h = document.getElementById("harga");
+
+  n.innerHTML = '<option value="">-- Pilih Nominal --</option>';
+  h.value = "";
+
+  if(!dataNominal[g]) return;
+
+  dataNominal[g].forEach(item=>{
+    const opt = document.createElement("option");
+    opt.textContent = item.nama;
+    opt.setAttribute("data-dana", item.dana);
+    opt.setAttribute("data-ovo", item.ovo);
+    opt.setAttribute("data-gopay", item.gopay);
+    n.appendChild(opt);
+  });
 }
 
-function toggleServer(){
-  const game = document.getElementById("game").value;
-  document.getElementById("serverBox").style.display =
-    game === "Honor of Kings" ? "none" : "block";
+// UPDATE HARGA SESUAI NOMINAL & METODE
+function updateHarga(){
+  const n = document.getElementById("nominal");
+  const selected = n.options[n.selectedIndex];
+  if(!selected || selected.value==="") return;
+
+  const metode = document.querySelector('input[name="pay"]:checked').value;
+  let harga = 0;
+
+  if(metode==="DANA") harga = selected.getAttribute("data-dana");
+  else if(metode==="OVO") harga = selected.getAttribute("data-ovo");
+  else if(metode==="GoPay") harga = selected.getAttribute("data-gopay");
+
+  document.getElementById("harga").value = harga ? "Rp "+Number(harga).toLocaleString("id-ID") : "";
 }
 
-function orderWA(){
-  const game = gameEl.value;
-  const id = userid.value;
-  const server = serverBox.style.display === "none" ? "" : server.value;
+// KIRIM KE WHATSAPP
+function kirimWA(){
+  const game   = document.getElementById("game").value;
+  const id     = document.getElementById("userid").value;
+  const server = document.getElementById("server").value;
   const nominal = document.getElementById("nominal").value;
-  const harga = document.getElementById("harga").value;
+  const harga   = document.getElementById("harga").value;
+  const pay     = document.querySelector('input[name="pay"]:checked').value;
 
-  const text =
-`Halo admin, saya mau top up
+  if(!id || !nominal){
+    alert("Lengkapi data dulu ya 😊");
+    return;
+  }
+
+  let text = `Halo admin, saya mau top up
 
 Game   : ${game}
 ID     : ${id}
-${server ? "Server : " + server : ""}
+Server : ${server}
 Nominal: ${nominal}
 Harga  : ${harga}
-
-Saya sudah lihat metode pembayaran di website.`;
-
-  const phone = "6283829117663"; // GANTI NOMOR KAMU
-  window.open(
-    "https://wa.me/" + phone + "?text=" + encodeURIComponent(text),
-    "_blank"
-  );
+Metode : ${pay}
+`;
+  window.open("https://wa.me/6283829117663?text=" + encodeURIComponent(text), "_blank");
 }
 </script>
 
